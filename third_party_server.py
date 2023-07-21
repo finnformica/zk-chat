@@ -1,11 +1,14 @@
 from fastapi import FastAPI
-import asyncio
-import time
-import lorem
-import random
 import itertools
+import lorem
+import pydantic
 
 app = FastAPI()
+
+
+class ChatRequest(pydantic.BaseModel):
+    msg: str
+    api_key: str
 
 
 @app.get("/")
@@ -14,7 +17,9 @@ def root():
 
 
 @app.post("/chat")
-def chat(msg):
-    print(f"Received message: {msg}")
+def chat(req: ChatRequest):
+    if req.api_key != "123456":
+        return {"message": "Invalid API Key"}
+    print(f"Received message: {req.msg}")
     res = list(itertools.islice(lorem.paragraph(sentence_range=(3, 10)), 1))[0]
-    return {"message": f"{msg}\n{res}"}
+    return {"message": f"{req.msg}\n{res}"}
