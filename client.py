@@ -1,21 +1,5 @@
-import functools
-import time
-
-import requests
 from concurrent.futures import ThreadPoolExecutor as Pool
-
-
-def timed(N, url, fn):
-    @functools.wraps(fn)
-    def wrapper(*args, **kwargs):
-        start = time.time()
-        res = fn(*args, **kwargs)
-        stop = time.time()
-        duration = stop - start
-        print(f"{N / duration:.2f} reqs / sec | {N} reqs | {url} | {fn.__name__}")
-        return res
-
-    return wrapper
+import requests
 
 
 def post(url, worker_no):
