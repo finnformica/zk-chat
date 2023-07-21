@@ -1,36 +1,19 @@
+from fastapi import FastAPI
 import time
 import asyncio
-from fastapi import FastAPI
+import requests
 
 app = FastAPI()
 
-
-@app.route("/")
-def index():
-    return "<h1>zkChat proxy</h1>"
+tps_base_url = "http://localhost:10001"
 
 
-@app.get("/wait")
-def wait():
-    duration = 0.05
-    time.sleep(duration)
-    return {"duration": duration}
+@app.get("/")
+def root():
+    return {"message": "zkChat Proxy Server"}
 
 
-@app.get("/asyncwait")
-async def asyncwait():
-    duration = 0.05
-    await asyncio.sleep(duration)
-    return {"duration": duration}
-
-
-@app.get("/fib/{n}")
-def fib(n: int):
-    return {"fib": fibo(n)}
-
-
-def fibo(n):
-    if n < 2:
-        return 1
-    else:
-        return fibo(n - 1) + fibo(n - 2)
+@app.post("/tps")
+def query_tps(msg):
+    res = requests.post(tps_base_url + "/chat", json={"msg": msg})
+    return res.json()
