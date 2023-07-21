@@ -1,0 +1,1 @@
+uvicorn third_party_server:app --reload --port 10001
