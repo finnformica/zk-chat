@@ -44,36 +44,7 @@ def thread_pool(url, n, limit=None):
     return result
 
 
-async def aget(session, url):
-    async with session.get(url) as response:
-        assert response.status == 200
-        json = await response.json()
-        return json
-
-
-async def gather_limit(n_workers, *tasks):
-    semaphore = asyncio.Semaphore(n_workers)
-
-    async def sem_task(task):
-        async with semaphore:
-            return await task
-
-    return await asyncio.gather(*(sem_task(task) for task in tasks))
-
-
-async def aget_all(url, n, n_workers=None):
-    limit = n_workers or n
-    async with aiohttp.ClientSession() as session:
-        result = await gather_limit(limit, *[aget(session, url) for _ in range(n)])
-        return result
-
-
-def async_main(url, n):
-    return asyncio.run(aget_all(url, n))
-
-
 if __name__ == "__main__":
     urls = ["http://127.0.0.1:8000/wait", "http://127.0.0.1:8000/asyncwait"]
-    funcs = [sync_get_all, thread_pool, async_main]
-    run_bench(100, funcs, urls)
-    run_bench(1000, [thread_pool, async_main], urls)
+    funcs = [sync_get_all, thread_pool]
+    run_bench(1000, funcs, urls)
