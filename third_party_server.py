@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 import itertools
-import lorem
+from lorem import paragraph
 
 
 app = FastAPI(
@@ -11,8 +11,14 @@ app = FastAPI(
 )
 
 
+class History(BaseModel):
+    user_messages: list
+    bot_messages: list
+
+
 class ChatRequest(BaseModel):
-    msg: str
+    message: str
+    history: History
     api_key: int
 
 
@@ -25,6 +31,19 @@ def index():
 def chat(req: ChatRequest):
     if req.api_key != 123456:
         return {"message": "Invalid API Key"}
-    print(f"Received message: {req.msg}")
-    res = list(itertools.islice(lorem.paragraph(sentence_range=(3, 10)), 1))[0]
-    return {"message": f"{req.msg}\n{res}"}
+
+    res = list(itertools.islice(paragraph(sentence_range=(3, 10)), 1))[0]
+
+    user_messages = (req.history.user_messages or []) + [req.message]
+    bot_messages = (req.history.bot_messages or []) + [res]
+
+    print(f"User messages: {user_messages}")
+    print(f"Bot messages: {bot_messages}")
+
+    return {
+        "message": res,
+        "history": {
+            "user_messages": user_messages,
+            "bot_messages": bot_messages,
+        },
+    }

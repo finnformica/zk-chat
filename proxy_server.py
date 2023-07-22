@@ -9,8 +9,14 @@ app = FastAPI(
 )
 
 
+class History(BaseModel):
+    user_messages: list
+    bot_messages: list
+
+
 class ProxyRequest(BaseModel):
-    msg: str
+    message: str
+    history: History
     api_key: int
 
 
@@ -26,6 +32,13 @@ def index():
 def query_tps(req: ProxyRequest):
     res = requests.post(
         tps_base_url + "/chat",
-        json={"msg": req.msg, "api_key": req.api_key},
+        json={
+            "message": req.message,
+            "history": {
+                "user_messages": req.history.user_messages,
+                "bot_messages": req.history.bot_messages,
+            },
+            "api_key": req.api_key,
+        },
     )
     return res.json()
