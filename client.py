@@ -8,7 +8,7 @@ import time
 
 
 CHAT_DELAY = (1, 10)
-CHAT_LENGTH = (1, 4)
+CHAT_LENGTH = (2, 4)
 NUM_WORKERS = 10
 
 TPS_API_KEY = 123456
@@ -48,7 +48,7 @@ class User:
 
 def post(url, worker_no):
     user = User(worker_no, url)
-    for i in range(random.randint(*CHAT_LENGTH)):
+    for _ in range(random.randint(*CHAT_LENGTH)):
         time.sleep(random.randint(*CHAT_DELAY))
         user.request_proxy()
 
@@ -67,4 +67,4 @@ if __name__ == "__main__":
     result = thread_pool(url, NUM_WORKERS)
 
     for i, res in enumerate(result):
-        print(f"Worker {i}:\n{json.dumps(res['history'], indent=2)}\n")
+        print(f"Worker {i}:\n{json.dumps(res, indent=4)}\n")

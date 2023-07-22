@@ -1,6 +1,6 @@
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
 import requests
 
 app = FastAPI(
