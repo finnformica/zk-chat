@@ -37,9 +37,6 @@ def chat(req: ChatRequest):
     user_messages = (req.history.user_messages or []) + [req.message]
     bot_messages = (req.history.bot_messages or []) + [res]
 
-    print(f"User messages: {user_messages}")
-    print(f"Bot messages: {bot_messages}")
-
     return {
         "message": res,
         "history": {
