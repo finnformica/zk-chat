@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 import requests
 
 app = FastAPI(
@@ -14,6 +15,11 @@ class ProxyRequest(BaseModel):
 
 
 tps_base_url = "http://localhost:10001"
+
+
+@app.get("/")
+def index():
+    return RedirectResponse(url="/docs")
 
 
 @app.post("/tps")

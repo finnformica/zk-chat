@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 import itertools
 import lorem
 
@@ -13,6 +14,11 @@ app = FastAPI(
 class ChatRequest(BaseModel):
     msg: str
     api_key: int
+
+
+@app.get("/")
+def index():
+    return RedirectResponse(url="/docs")
 
 
 @app.post("/chat")
