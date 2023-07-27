@@ -1,6 +1,6 @@
 import pyshark
 
-capture = pyshark.LiveCapture(output_file="packets/pyshark.pcap", interface="en0")
-capture.sniff(timeout=20)
+capture = pyshark.LiveCapture(output_file="packets/pyshark.pcap", interface="lo0")
+capture.sniff(timeout=50)
 
 print(capture)
