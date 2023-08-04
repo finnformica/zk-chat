@@ -1,6 +1,4 @@
 from fastapi.testclient import TestClient
-from httpx import AsyncClient
-import pytest
 import sys
 import os
 
@@ -14,13 +12,6 @@ client = TestClient(app)
 def test_read_home():
     response = client.get("/")
     assert response.status_code == 200
-
-
-# @pytest.mark.anyio
-# async def test_proxy():
-#     async with AsyncClient(app=app) as aclient:
-#         response = await aclient.post("example.com", json={"scheme": "https"})
-#         assert response.status_code == 200
 
 
 def test_proxy():
@@ -39,3 +30,5 @@ def test_proxy():
         )
 
         assert response.json()["data"] == payload["data"]
+        assert response.json()["name"] == payload["name"]
+        assert response.status_code == 200
