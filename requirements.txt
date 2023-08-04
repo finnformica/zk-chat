@@ -6,6 +6,7 @@ gunicorn
 pydantic
 python-lorem
 authlib
+pytest
 
 # network sniffing
 pyshark==0.6
