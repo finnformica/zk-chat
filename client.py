@@ -63,8 +63,9 @@ def thread_pool(url, num_workers, limit=None):
 
 
 if __name__ == "__main__":
-    url = "http://localhost:10000/tps"
-    result = thread_pool(url, NUM_WORKERS)
+    proxy_url = "http://localhost:10000/"
+    endpoint = "localhost:10001/chat"
+    result = thread_pool(proxy_url + endpoint, NUM_WORKERS)
 
     for i, res in enumerate(result):
         print(f"Worker {i}:\n{json.dumps(res, indent=4)}\n")
