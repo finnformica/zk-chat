@@ -1,14 +1,25 @@
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from starlette.responses import HTMLResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
+from contextlib import asynccontextmanager
 from starlette.requests import Request
 from starlette.config import Config
 from pydantic import BaseModel
 from fastapi import FastAPI
-import requests
+import httpx
 import json
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # initialise the client on startup and add it to the state
+    async with httpx.AsyncClient() as client:
+        yield {"client": client}
+        # client closes on shutdown
+
+
 app = FastAPI(
+    lifespan=lifespan,
     title="zkChat Proxy Server",
     description="This is a proxy server for zkChat.",
 )
@@ -30,15 +41,6 @@ oauth.register(
 class History(BaseModel):
     user_messages: list
     bot_messages: list
-
-
-class ProxyRequest(BaseModel, Request):
-    message: str
-    history: History
-    api_key: int
-
-
-tps_base_url = "http://localhost:10001"
 
 
 @app.get("/")
@@ -75,27 +77,11 @@ async def logout(request: Request):
     return RedirectResponse(url="/")
 
 
-@app.post("/tps")
-def query_tps(request: ProxyRequest):
-    user = request.session.get("user")
-    if user:
-        res = requests.post(
-            tps_base_url + "/chat",
-            json={
-                "message": request.message,
-                "history": {
-                    "user_messages": request.history.user_messages,
-                    "bot_messages": request.history.bot_messages,
-                },
-                "api_key": request.api_key,
-            },
-        )
-        return res.json()
-    else:
-        return {"error": "not logged in"}
+@app.post("/{path:path}")
+async def proxy(request: Request, path: str, scheme: str = "http"):
+    url = f"{scheme}://{path}"
+    payload = await request.json()
+    client = request.state.client
+    response = await client.post(url, params=request.query_params, json=payload)
 
-
-# if __name__ == "__main__":
-#     import uvicorn
-
-#     uvicorn.run(app, host="127.0.0.1", port=8000)
+    return response.json()
