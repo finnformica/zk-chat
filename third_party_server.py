@@ -1,4 +1,3 @@
-from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from fastapi import FastAPI
 from lorem import paragraph
@@ -24,7 +23,7 @@ class ChatRequest(BaseModel):
 
 @app.get("/")
 def index():
-    return RedirectResponse(url="/docs")
+    return {"message": "Hello World!"}
 
 
 @app.post("/chat")
