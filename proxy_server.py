@@ -1,11 +1,17 @@
 from authlib.integrations.starlette_client import OAuth, OAuthError
+
 from starlette.responses import HTMLResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
-from contextlib import asynccontextmanager
 from starlette.requests import Request
 from starlette.config import Config
+
+from fastapi import Depends, FastAPI, Security
+from fastapi.responses import FileResponse
+from fastapi_resource_server import OidcResourceServer
+
+from contextlib import asynccontextmanager
 from pydantic import BaseModel
-from fastapi import FastAPI
+
 import httpx
 import json
 
@@ -28,14 +34,26 @@ app.add_middleware(SessionMiddleware, secret_key="!secret")
 config = Config(".env")
 oauth = OAuth()
 
-CONF_URL = "https://accounts.google.com/.well-known/openid-configuration"
+BASE_URL = "http://localhost:8080/realms/vc-authn"
+# BASE_URL = "https://vcauthn.cloudcompass.ca"
+CONF_URL = f"{BASE_URL}/.well-known/openid-configuration"
 oauth.register(
-    name="google",
-    client_id=config("GOOGLE_CLIENT_ID"),
-    client_secret=config("GOOGLE_CLIENT_SECRET"),
+    name="keycloak_sso",
     server_metadata_url=CONF_URL,
+    client_id="fast-api",
     client_kwargs={"scope": "openid email profile"},
 )
+
+
+auth_scheme = OidcResourceServer(BASE_URL)
+
+
+class User(BaseModel):
+    sub: str
+    username: str
+    given_name: str
+    family_name: str
+    email: str
 
 
 class History(BaseModel):
@@ -43,12 +61,30 @@ class History(BaseModel):
     bot_messages: list
 
 
-@app.get("/")
-async def homepage(request: Request):
+def get_current_user(claims: dict = Security(auth_scheme)):
+    print(claims)
+    claims.update(username=claims["preferred_username"])
+    user = User.model_validate(claims)
+    return user
+
+
+@app.get("/users/me")
+def read_current_user(request: Request):
     user = request.session.get("user")
     if user:
         data = json.dumps(user)
-        html = f"<pre>{data}</pre>" '<a href="/logout">logout</a>'
+        html = (
+            f"<pre>{data}</pre>" '<a href="/logout">logout</a></br><a href="/">home</a>'
+        )
+        return HTMLResponse(html)
+    return RedirectResponse(url="/login")
+
+
+@app.get("/", include_in_schema=False)
+async def homepage(request: Request):
+    user = request.session.get("user")
+    if user:
+        html = '<a href="/logout">logout</a></br><a href="/users/me">user</a>'
         return HTMLResponse(html)
     return HTMLResponse('<a href="/login">login</a>')
 
@@ -56,19 +92,19 @@ async def homepage(request: Request):
 @app.get("/login")
 async def login(request: Request):
     redirect_uri = request.url_for("auth")
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+    return await oauth.keycloak_sso.authorize_redirect(request, redirect_uri)
 
 
 @app.get("/auth")
 async def auth(request: Request):
     try:
-        token = await oauth.google.authorize_access_token(request)
+        token = await oauth.keycloak_sso.authorize_access_token(request)
     except OAuthError as error:
         return HTMLResponse(f"<h1>{error.error}</h1>")
     user = token.get("userinfo")
     if user:
         request.session["user"] = dict(user)
-    return RedirectResponse(url="/")
+    return RedirectResponse(url="/users/me")
 
 
 @app.get("/logout")
@@ -79,9 +115,23 @@ async def logout(request: Request):
 
 @app.post("/{path:path}")
 async def proxy(request: Request, path: str, scheme: str = "http"):
-    url = f"{scheme}://{path}"
-    payload = await request.json()
-    client = request.state.client
-    response = await client.post(url, params=request.query_params, json=payload)
+    user = request.session.get("user")
+    if user:
+        url = f"{scheme}://{path}"
+        payload = await request.json()
+        client = request.state.client
+        response = await client.post(url, params=request.query_params, json=payload)
 
-    return response.json()
+        return response.json()
+    else:
+        return {"error": "not logged in"}
+
+
+def main():
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=10000)
+
+
+if __name__ == "__main__":
+    main()
