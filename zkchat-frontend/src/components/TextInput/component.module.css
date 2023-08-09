@@ -1,0 +1,29 @@
+.textInput {
+    border: 1px solid rgba(var(--card-border-rgb), 0.15);
+    border-radius: 8px;
+}
+
+.textInput {
+    background: rgba(var(--card-rgb), 0.2);
+    padding: 12px;
+    width: 100%;
+}
+
+.textInput:focus {
+    outline: none;
+    border: 1px solid rgba(var(--card-border-rgb), 0.3);
+}
+
+.container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
