@@ -5,8 +5,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.requests import Request
 from starlette.config import Config
 
-from fastapi import Depends, FastAPI, Security
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Security
 from fastapi_resource_server import OidcResourceServer
 
 from contextlib import asynccontextmanager
@@ -34,14 +33,18 @@ app.add_middleware(SessionMiddleware, secret_key="!secret")
 config = Config(".env")
 oauth = OAuth()
 
-BASE_URL = "http://localhost:8080/realms/vc-authn"
-# BASE_URL = "https://vcauthn.cloudcompass.ca"
+# BASE_URL = "http://localhost:8080/realms/vc-authn"
+BASE_URL = "https://vcauthn-kc.cloudcompass.ca/auth/realms/vc-authn"
 CONF_URL = f"{BASE_URL}/.well-known/openid-configuration"
+CLIENT_ID = "vue-fe"
+PRES_REQ_CONF_ID = "verified-email"
+
 oauth.register(
     name="keycloak_sso",
     server_metadata_url=CONF_URL,
-    client_id="fast-api",
-    client_kwargs={"scope": "openid email profile"},
+    client_id=CLIENT_ID,
+    # client_kwargs={"scope": "openid email profile"},
+    client_kwargs={"scope": "openid"},
 )
 
 
@@ -98,6 +101,7 @@ async def login(request: Request):
 @app.get("/auth")
 async def auth(request: Request):
     try:
+        print("Awaiting AUTHN TOKEN")
         token = await oauth.keycloak_sso.authorize_access_token(request)
     except OAuthError as error:
         return HTMLResponse(f"<h1>{error.error}</h1>")
