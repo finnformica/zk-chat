@@ -7,6 +7,10 @@
     min-height: 100vh;
 }
 
+.container {
+    height: 100%;
+}
+
 .homeLink, .arrow {
     transition: all 200ms;
 }

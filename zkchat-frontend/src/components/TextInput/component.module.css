@@ -19,6 +19,7 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+    max-width: 720px;
 }
 
 .button {
@@ -27,3 +28,12 @@
     cursor: pointer;
 }
 
+.spin {
+    animation: spin 1s linear infinite;
+    cursor: default;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

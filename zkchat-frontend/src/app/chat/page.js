@@ -1,29 +1,59 @@
-import Link from "next/link";
-import styles from "./page.module.css";
+"use client";
+import { useState, useEffect } from "react";
+import { useSession, signIn } from "next-auth/react";
+
 import Header from "@/components/Header";
-
-import { FaArrowLeft } from "react-icons/fa";
 import TextInput from "@/components/TextInput";
+import ChatRow from "@/components/ChatRow";
+import MainContainer from "@/components/MainContainer";
 
-const HomeLink = () => {
-  return (
-    <Link href="/" className={styles.link}>
-      <FaArrowLeft size="1.2rem" className={styles.arrow} />{" "}
-      <h2 className={styles.homeLink}>Home</h2>
-    </Link>
-  );
-};
+import styles from "./page.module.css";
 
 const Chat = () => {
-  return (
-    <main className={styles.main}>
-      <Header
-        left={<p style={{ fontSize: "2rem" }}>zkChat</p>}
-        right={<HomeLink />}
-      />
+  const [chat, setChat] = useState({});
+  const [loadingChat, setLoadingChat] = useState(false);
 
-      <TextInput />
-    </main>
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    localStorage.setItem(
+      "chat",
+      JSON.stringify({
+        user: [],
+        bot: [],
+      })
+    );
+
+    window.addEventListener("storage", (e) => {
+      console.log(JSON.parse(localStorage.getItem("chat")));
+      setLoadingChat(true);
+
+      setTimeout(() => {
+        setLoadingChat(false);
+      }, 3000);
+    });
+  }, []);
+
+  if (status === "unauthenticated") {
+    signIn("keycloak", { callbackUrl: "/chat" });
+  }
+
+  if (status !== "authenticated") {
+    return <p>Loading...</p>;
+  }
+
+  return (
+    <MainContainer>
+      <Header left={<p style={{ fontSize: "2rem" }}>zkChat : Chat</p>} />
+
+      <div className={styles.container}>
+        <ChatRow />
+        <ChatRow />
+        <ChatRow />
+      </div>
+
+      <TextInput loading={loadingChat} />
+    </MainContainer>
   );
 };
 

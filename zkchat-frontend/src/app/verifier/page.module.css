@@ -1,0 +1,16 @@
+.button {
+    border-radius: var(--border-radius);
+    background: rgba(var(--card-rgb), 0.1);
+    border: 1px solid rgba(var(--card-border-rgb), 0.15);
+    padding: 10px 20px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    transition: background 200ms, border 200ms;
+}
+
+.button:hover {
+    background: rgba(var(--card-rgb), 0.6);
+    border: 1px solid rgba(var(--card-border-rgb), 0);
+}

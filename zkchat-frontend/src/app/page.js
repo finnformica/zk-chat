@@ -29,7 +29,7 @@ export default function Home() {
           <h2>
             Verifier <span>-&gt;</span>
           </h2>
-          <p>Log in using exising credential.</p>
+          <p>Log in using a valid Verifiable Credential.</p>
         </Link>
         <Link href="/learn" className={styles.card}>
           <h2>
@@ -42,7 +42,7 @@ export default function Home() {
           <h2>
             Chat <span>-&gt;</span>
           </h2>
-          <p>Interact with ChatGPT anonymously and securely using zkChat.</p>
+          <p>Interact with ChatGPT anonymously using zkChat.</p>
         </Link>
       </div>
     </main>
