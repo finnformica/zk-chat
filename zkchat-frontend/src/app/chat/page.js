@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSession, signIn } from "next-auth/react";
 
 import Header from "@/components/Header";
@@ -9,28 +9,21 @@ import MainContainer from "@/components/MainContainer";
 
 import styles from "./page.module.css";
 
-const Chat = () => {
+const ChatPage = () => {
   const [chat, setChat] = useState({});
-  const [loadingChat, setLoadingChat] = useState(false);
 
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    localStorage.setItem(
-      "chat",
-      JSON.stringify({
-        user: [],
-        bot: [],
-      })
-    );
+    const initChat = {
+      user: [],
+      bot: [],
+    };
+    localStorage.setItem("chat", JSON.stringify(initChat));
+    setChat(initChat);
 
     window.addEventListener("storage", (e) => {
-      console.log(JSON.parse(localStorage.getItem("chat")));
-      setLoadingChat(true);
-
-      setTimeout(() => {
-        setLoadingChat(false);
-      }, 3000);
+      setChat(JSON.parse(localStorage.getItem("chat")));
     });
   }, []);
 
@@ -46,15 +39,20 @@ const Chat = () => {
     <MainContainer>
       <Header left={<p style={{ fontSize: "2rem" }}>zkChat : Chat</p>} />
 
-      <div className={styles.container}>
-        <ChatRow />
-        <ChatRow />
-        <ChatRow />
-      </div>
+      {chat && chat.user && chat.user.length > 0 && (
+        <div className={styles.container}>
+          {chat.user.map((message, index) => (
+            <React.Fragment key={index}>
+              <ChatRow message={message} />
+              <ChatRow message={chat.bot[index]} />
+            </React.Fragment>
+          ))}
+        </div>
+      )}
 
-      <TextInput loading={loadingChat} />
+      <TextInput />
     </MainContainer>
   );
 };
 
-export default Chat;
+export default ChatPage;

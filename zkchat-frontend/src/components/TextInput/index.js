@@ -5,25 +5,60 @@ import styles from "./component.module.css";
 import { BiSend } from "react-icons/bi";
 import { ImSpinner8 } from "react-icons/im";
 
-const TextInput = ({ loading }) => {
+const TextInput = () => {
   const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const storeUserMessage = () => {
+    const chat = JSON.parse(localStorage.getItem("chat"));
+    localStorage.setItem(
+      "chat",
+      JSON.stringify({
+        ...chat,
+        user: [...chat.user, "USER: " + text],
+      })
+    );
+    dispatchEvent(new Event("storage"));
 
-    if (loading) return;
+    setText("");
+  };
+
+  const fetchBotMessage = async () => {
+    const data = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+
+      body: JSON.stringify({
+        message: text,
+      }),
+    })
+      .then((res) => res.json())
+      .catch((err) => console.log(err))
+      .finally(() => setLoading(false));
 
     const chat = JSON.parse(localStorage.getItem("chat"));
     localStorage.setItem(
       "chat",
       JSON.stringify({
         ...chat,
-        user: [...chat.user, text],
+        bot: [...chat.bot, "BOT: " + data?.message],
       })
     );
     dispatchEvent(new Event("storage"));
+  };
 
-    setText("");
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (loading) return;
+
+    setLoading(true);
+
+    storeUserMessage();
+    fetchBotMessage();
   };
 
   return (
