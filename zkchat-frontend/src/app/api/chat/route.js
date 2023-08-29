@@ -2,19 +2,22 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 
-export async function POST(request) {
+export async function POST(req, res) {
   const session = await getServerSession(authOptions);
+  const json = await req.json();
+
+  console.log(json);
+
   if (session) {
     const body = {
-      message: "hello world",
+      message: json.message,
       history: {
         user_messages: [],
         bot_messages: [],
       },
       api_key: process.env.THIRD_PARTY_SERVICE_APIKEY,
     };
-    console.log(body);
-    const data = await fetch("http://localhost:10001/chat", {
+    const data = await fetch(process.env.THIRD_PARTY_SERVICE_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
