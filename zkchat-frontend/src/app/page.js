@@ -19,7 +19,11 @@ export default function Home() {
       <AppLogo />
 
       <div className={styles.grid}>
-        <Link href="/issuer" className={styles.card}>
+        <Link
+          href="https://email-verification.vonx.io/"
+          className={styles.card}
+          target="_blank"
+        >
           <h2>
             Issuer <span>-&gt;</span>
           </h2>
