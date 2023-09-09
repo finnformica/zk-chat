@@ -49,8 +49,6 @@ The `zkchat-app` directory contains the Next.js app including the backend proxy 
 
 ### Setting up local Keycloak instance
 
-If a local keycloak instance is used this should be started BEFORE booting up the proxy server.
-
 1. Run command in terminal:
     ```sh
     docker run -p 8080:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:22.0.1 start-dev
@@ -60,9 +58,7 @@ If a local keycloak instance is used this should be started BEFORE booting up th
 
 3. Create a new realm called `vc-authn`
 
-4. Create a new client called `fast-api` and add a valid redirect URI as `localhost:10000`
-
-5. Create a new user and set up the password using the credentials tab (ensuring temporary toggle is off).
+4. Create a new client called `zk-chat` and add a valid redirect URI as `localhost:3000`
 
 ### Testing
 
