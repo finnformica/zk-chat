@@ -14,38 +14,30 @@ The `zkchat-app` directory contains the Next.js app including the backend proxy 
 
 ### Prerequisites
 
-- Python 3.8
-- pip
+- npm
 - Docker (for Keycloak)
+- [BC Wallet](https://www2.gov.bc.ca/gov/content/governments/government-id/bc-wallet) from BCGov (for Verifiable Credential)
+- [Email verification credential](https://email-verification.vonx.io/)
 
 ### Installation
 
 1. Clone the repo
    ```sh
-   git clone
+   git clone && cd /zk-chat
     ```
-3. Create a virtual environment
+2. Install dependencies
     ```sh
-    python3 -m venv venv && source venv/bin/activate
+    cd /zk-chat-app && npm install
     ```
-2. Install requirements
+3. Start dev server
     ```sh
-    pip3 install -r requirements.txt
+    npm run dev
     ```
-3. Run the proxy
-    ```sh
-    scripts/run_proxy.sh
-    ```
-
-4. Run the mock third party service
+4. From the root directory run the mock chatbot service
     ```sh
     scripts/run_tps.sh
     ```
-
-5. Run the client
-    ```sh
-    python3 client.py
-    ```
+5. Navigate to `localhost:3000` in your browser
 
 ### Setting up local Keycloak instance
 
